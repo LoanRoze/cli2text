@@ -1,0 +1,491 @@
+Voici le contenu de votre dossier ./
+|------------------------------------------------------------------------|
+
+File : cli2text.js
+Path : .\cli2text.js
+Weight : 3.87ko
+
+import chalk from "chalk";
+import fs from "node:fs/promises";
+import path, { sep } from "node:path";
+
+
+const IGNORE = [
+    "node_modules",
+    ".git",
+    "package.json",
+    "package-lock.json",
+    "output.txt",
+    // Add more files/directories here
+];
+
+function getFileType(fileName) {
+    const regex = /\.([a-zA-Z0-9]+)$/;
+    const match = fileName.match(regex);
+
+    if (match) return match[1]
+    else return null
+}
+
+async function listOfFiles(dir, indent="", list_of_files = []) {
+    const dirFiles = await fs.readdir(dir, {withFileTypes : true})
+    for (const file of dirFiles) {
+        const fileInfo = {
+            parent : file.parentPath,
+            path : path.join(dir, file.name),
+            name : file.name,
+            indentation : indent,
+            isFolder : file.isDirectory()
+        }
+        if (IGNORE.includes(file.name)) {
+            continue;
+        }
+        if (file.isDirectory()) {
+            list_of_files.push(fileInfo)
+            await listOfFiles(fileInfo.path, indent + "  ", list_of_files)
+        } else {
+            list_of_files.push(fileInfo)
+        }
+    }
+    return list_of_files
+}
+
+async function extractInfos(dir, output_path = "./output.txt") {
+    const filesList = await listOfFiles(dir)
+    let tree = "\nArchitecture des fichiers : \n\n";
+    const separator = "\n|------------------------------------------------------------------------|\n"
+    let fileContent = "Voici le contenu de votre dossier " + dir + separator;
+
+    for (const file of filesList) {
+        if (file.isFolder) {
+            tree += `${file.indentation}📁 ${chalk.hex('#bf7a21')(file.name)}/\n`
+            fileContent += '\n'
+            fileContent += `Directory : ${file.name}/\n`
+            fileContent += `Path : .\\${file.path}\n`
+            fileContent += separator
+        }
+        else {
+            tree += `${file.indentation}📄 ${chalk.green(file.name)}\n`
+
+            fileContent += '\n'
+            fileContent += `File : ${file.name}\n`
+            fileContent += `Path : .\\${file.path}\n`
+            fileContent += `Weight : ${Math.round( ((await fs.stat(file.path)).size / 1024) * 100) / 100}ko\n`
+            fileContent += '\n'
+            fileContent += await fs.readFile(file.path, "utf-8") 
+            fileContent += separator
+
+        }
+    }
+    fs.writeFile(output_path, fileContent)
+    console.log(tree)
+}
+
+await extractInfos("./")
+
+// const tree = await listOfFiles("./");
+// let output = "Extracting file datas in progress... \n"
+// for (const el of tree) {
+//     output += '\n' + el
+// }
+// output += "\n\nEnd of file extraction !\n"
+// console.log(output);
+
+
+// async function createTree(dir) {
+//     const tree = {};
+//     const fileList = await listOfFiles(dir)
+
+//     for (const file of fileList) {
+//         const parts = file.path.split('\\');
+//         let current = tree;
+
+//         parts.forEach((part, depth) => {
+//             if (!current[part]) {
+//                 current[part] = {
+//                     isFile: depth === parts.length - 1,
+//                     children: {},
+//                 };
+//             }
+//             current = current[part].children;
+//         });
+//     }
+
+//     return tree;
+// }
+
+// async function printTree(tree, depth = 0, output = "") {
+    
+//     const indentation = '    '.repeat(depth);
+//     const treeNodes = Object.keys(tree)
+    
+//     for (const key of treeNodes) {
+//         const node = tree[key];
+
+//         if (node.isFile) {
+//             output += `\n${indentation}📄 ${key}`
+//         } else {
+//             output += `\n${indentation}📁 ${key}`
+//             await printTree(node.children, depth + 1, output);
+//         }
+//     }
+//     console.log(output)
+//     return output
+// }
+
+// console.log(
+// await printTree(await createTree("./"))
+// )
+
+|------------------------------------------------------------------------|
+
+File : README.md
+Path : .\README.md
+Weight : 4.33ko
+
+# 🛠️ Projet `Node.js`
+
+📋 Le README présenté ci-dessous décrit un projet conceptuel qui n'a pas encore été développé.  
+
+🗺️ Votre mission consiste à créer ce projet en implémentant toutes les fonctionnalités spécifiées, en respectant les détails techniques et les règles de fonctionnement énoncées. Il s'agit de coder un outil Node.js complet, capable d'analyser les répertoires, de générer une représentation structurée de leur contenu, et de produire une sortie formatée conforme aux attentes décrites.  
+
+✅ Assurez-vous de suivre **précisément les instructions** pour garantir que le projet final correspond au fonctionnement attendu.  
+
+📊 Pendant le développement, vous pouvez tester l'outil sur le dossier ``./src`` fourni afin de vérifier qu'il fonctionne correctement..
+
+# Node.js Directory Processor - **cli2text** 🚀
+
+This Node.js project provides a command-line tool for recursively processing directories and generating a structured representation of their contents. It is designed to exclude unnecessary files, format file sizes for readability, and produce outputs suitable for further analysis or reporting.
+
+## 🌟 How It Works
+
+1. **Scan the Current Directory**: The tool scans the directory from where the script is executed.
+2. **Skip Ignored Items**: Excluded files and directories are skipped based on the `IGNORE` array.
+3. **Log and Save**: Outputs the directory structure to the console and writes it to `output.txt` in the current directory.
+
+## ✨ Features
+
+- **Recursive Directory Traversal**: Efficiently processes all files and subdirectories in the current directory.
+- **Exclusion Rules**: Skips predefined files and directories like `node_modules` and `.git` to focus on relevant content.
+- **Human-Readable File Sizes**: Converts raw byte sizes into readable units (e.g., KB, MB).
+- **Automated Output**: Always generates the output in an `output.txt` file in the current directory.
+- **Colorized CLI Output**: Uses `chalk` to display directory and file names in a visually appealing manner.
+
+## 🛠️ Prerequisites
+
+Before using this tool, ensure that you have the following installed on your system:
+
+- [Node.js](https://nodejs.org/) (v16 or later)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+
+## 🚀 Installation
+
+1. Clone this repository:
+
+   ```bash
+   git clone <repository-url>
+   cd <repository-folder>
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+   Or, if using Yarn:
+
+   ```bash
+   yarn install
+   ```
+
+## 🎯 Usage
+
+### Running the Tool
+
+Execute the script with Node.js. No arguments are required; the tool processes the current directory and automatically generates an `output.txt` file.
+
+```bash
+node cli2text.js
+```
+
+### Example Output *
+
+- **Directories** are displayed with a `📂` icon in green.
+- **Files** include their names and sizes, formatted for readability, displayed in green with a `📄` icon.
+- **Indented Structure** reflects the hierarchy of the directory tree.
+
+```text
+File and folder tree for : ./
+
+📄 cli2output.js
+📂 demo
+   📄 data.txt
+   📂 data_1
+      📄 data_1.csv
+📄 index.html
+📄 index.js
+
+Compilation completed. Content saved in "output.txt"
+```
+
+\* Colors are not displayed in README.md example
+
+### Exclusion Rules
+
+By default, the following files and directories are ignored:
+
+- `node_modules`
+- `.git`
+- `package.json`
+- `package-lock.json`
+- `output.txt`
+
+To exclude additional files or directories, update the `IGNORE` array in `cli2text.js`:
+
+```javascript
+const IGNORE = [
+  "node_modules",
+  ".git",
+  "package.json",
+  "package-lock.json",
+  "output.txt",
+  // Add more files/directories here
+];
+```
+
+## 📄 Code Overview
+
+### Key Functions
+
+#### `formatSize(bytes)`
+
+Converts a byte value into human-readable units (e.g., KB, MB).
+
+#### `processTree(directory, indent, compiledContent)`
+
+Traverses the directory structure recursively:
+- Logs directories and files to the console.
+- Appends structured data to `compiledContent`.
+- Writes the final output to `output.txt` in the current directory.
+
+### Dependencies
+
+- **`fs/promises`**: Handles asynchronous file system operations.
+- **`path`**: Constructs file and directory paths.
+- **`chalk` (vendor)**: Adds colorized output for better readability.
+|------------------------------------------------------------------------|
+
+Directory : src/
+Path : .\src
+
+|------------------------------------------------------------------------|
+
+Directory : components/
+Path : .\src\components
+
+|------------------------------------------------------------------------|
+
+File : taskItem.html
+Path : .\src\components\taskItem.html
+Weight : 0.11ko
+
+<li class="task-item">
+  <input type="checkbox">
+  <span>Task text here</span>
+  <button>Delete</button>
+</li>
+
+|------------------------------------------------------------------------|
+
+Directory : css/
+Path : .\src\css
+
+|------------------------------------------------------------------------|
+
+File : styles.css
+Path : .\src\css\styles.css
+Weight : 0.76ko
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f0f0f0;
+}
+
+header {
+  background: #6200ea;
+  color: #fff;
+  text-align: center;
+  padding: 1rem;
+}
+
+.logo {
+  width: 50px;
+  height: auto;
+  display: inline-block;
+}
+
+#app {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 10px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#task-list {
+  list-style: none;
+  padding: 0;
+}
+
+#task-form {
+  display: flex;
+  gap: 10px;
+}
+
+#task-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  background: #6200ea;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+|------------------------------------------------------------------------|
+
+File : themes.css
+Path : .\src\css\themes.css
+Weight : 0ko
+
+
+|------------------------------------------------------------------------|
+
+Directory : data/
+Path : .\src\data
+
+|------------------------------------------------------------------------|
+
+File : tasks.json
+Path : .\src\data\tasks.json
+Weight : 0.12ko
+
+[
+  { "id": 1, "text": "Sample Task 1", "completed": false },
+  { "id": 2, "text": "Sample Task 2", "completed": true }
+]
+
+|------------------------------------------------------------------------|
+
+File : index.html
+Path : .\src\index.html
+Weight : 0.74ko
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/favicon.ico">
+</head>
+<body>
+  <header>
+    <h1>To-Do List</h1>
+    <img src="assets/logo.png" alt="App Logo" class="logo">
+  </header>
+  <main id="app">
+    <ul id="task-list"></ul>
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Add a new task" required>
+      <button type="submit">Add Task</button>
+    </form>
+  </main>
+  <footer>
+    <p>&copy; 2025 To-Do List App</p>
+  </footer>
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>
+
+|------------------------------------------------------------------------|
+
+Directory : js/
+Path : .\src\js
+
+|------------------------------------------------------------------------|
+
+File : app.js
+Path : .\src\js\app.js
+Weight : 0.51ko
+
+import { saveTask, getTasks } from './storage.js';
+import { renderTasks } from './dom.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const taskForm = document.getElementById('task-form');
+  const taskInput = document.getElementById('task-input');
+
+  taskForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const task = taskInput.value.trim();
+    if (task) {
+      saveTask(task);
+      taskInput.value = '';
+      renderTasks();
+    }
+  });
+
+  renderTasks();
+});
+
+|------------------------------------------------------------------------|
+
+File : dom.js
+Path : .\src\js\dom.js
+Weight : 0.33ko
+
+import { getTasks } from './storage.js';
+
+export function renderTasks() {
+  const taskList = document.getElementById('task-list');
+  taskList.innerHTML = '';
+
+  const tasks = getTasks();
+  tasks.forEach(task => {
+    const li = document.createElement('li');
+    li.textContent = task.text;
+    taskList.appendChild(li);
+  });
+}
+
+|------------------------------------------------------------------------|
+
+File : storage.js
+Path : .\src\js\storage.js
+Weight : 0.31ko
+
+const TASKS_KEY = 'tasks';
+
+export function saveTask(task) {
+  const tasks = getTasks();
+  tasks.push({ id: Date.now(), text: task, completed: false });
+  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+}
+
+export function getTasks() {
+  return JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
+}
+
+|------------------------------------------------------------------------|
