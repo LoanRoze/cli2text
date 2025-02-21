@@ -1,17 +1,5 @@
 # 🛠️ Projet `Node.js`
 
-📋 Le README présenté ci-dessous décrit un projet conceptuel qui n'a pas encore été développé.  
-
-🗺️ Votre mission consiste à créer ce projet en implémentant toutes les fonctionnalités spécifiées, en respectant les détails techniques et les règles de fonctionnement énoncées. Il s'agit de coder un outil Node.js complet, capable d'analyser les répertoires, de générer une représentation structurée de leur contenu, et de produire une sortie formatée conforme aux attentes décrites.  
-
-✅ Assurez-vous de suivre **précisément les instructions** pour garantir que le projet final correspond au fonctionnement attendu.  
-
-📊 Pendant le développement, vous pouvez tester l'outil sur le dossier ``./src`` fourni afin de vérifier qu'il fonctionne correctement..
-
-# Node.js Directory Processor - **cli2text** 🚀
-
-This Node.js project provides a command-line tool for recursively processing directories and generating a structured representation of their contents. It is designed to exclude unnecessary files, format file sizes for readability, and produce outputs suitable for further analysis or reporting.
-
 ## 🌟 How It Works
 
 1. **Scan the Current Directory**: The tool scans the directory from where the script is executed.
